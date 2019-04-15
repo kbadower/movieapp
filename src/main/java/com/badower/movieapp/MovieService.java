@@ -16,23 +16,19 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
-    Optional<Movie> getMovie(long id) {
+    Optional<Movie> getMovie(Long id) {
         return movieRepository.findById(id);
-    }
-
-    Iterable<Movie> getAllMovies() {
-        return movieRepository.findAll();
     }
 
     List<Movie> filter(Integer year, String title) {
         return movieRepository.findByYearAndTitle(year, title);
     }
 
-    Movie postMovie(Movie movie) {
+    Movie saveMovie(Movie movie) {
         return movieRepository.save(movie);
     }
 
-    Movie putMovie(long id, Movie movie) {
+    Movie updateMovie(Long id, Movie movie) {
         Movie updatedMovie = movieRepository.findById(id).map(m -> {
             m.setTitle(movie.getTitle());
             m.setYear(movie.getYear());
@@ -41,7 +37,8 @@ public class MovieService {
         return movieRepository.save(updatedMovie);
     }
 
-    void deleteMovie(long id) {
+    Boolean deleteMovie(Long id) {
         movieRepository.deleteById(id);
+        return true;
     }
 }

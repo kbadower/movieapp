@@ -2,133 +2,114 @@ package com.badower.movieapp;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class MovieServiceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
 
-    @MockBean
     private MovieRepository movieRepository;
+    private MovieService movieService;
 
     @Before
     public void setUp() throws Exception {
+        this.movieRepository = Mockito.mock(MovieRepository.class);
+        this.movieService = new MovieService(movieRepository);
+    }
+
+    public Movie movie(Long id, int year, String title) {
+        Movie movie = new Movie();
+        movie.setId(id);
+        movie.setYear(year);
+        movie.setTitle(title);
+        return movie;
     }
 
     @Test
     public void should_add_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        //Given
+        Long movieId = 1L;
+        Movie expectedMovie = movie(movieId, 2005, "TestTitle");
+        BDDMockito.given(movieRepository.save(expectedMovie)).willReturn(expectedMovie);
 
+        //When
+        Movie result = this.movieService.saveMovie(expectedMovie);
 
-        this.mockMvc.perform(post("/movies")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1, \"year\": 2005, \"title\": \"TestTitle\"}"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
+        //Then
+        assertThat(result).isEqualTo(expectedMovie);
         verify(movieRepository).save(expectedMovie);
-
-
     }
 
     @Test
     public void should_get_entity() throws Exception {
+        //Given
+        Long movieId = 1L;
+        Movie expectedMovie = movie(movieId, 2005, "TestTitle");
+        BDDMockito.given(movieRepository.findById(movieId)).willReturn(Optional.of(expectedMovie));
 
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        //When
+        Optional<Movie> result = this.movieService.getMovie(movieId);
 
-        when(movieRepository.findById(1L)).thenReturn(Optional.of(expectedMovie));
-
-        this.mockMvc.perform(get("/movies/1"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().json("{\"id\": 1, \"year\": 2005, \"title\": \"TestTitle\"}"))
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+        //Then
+        assertThat(result).isEqualTo(Optional.of(expectedMovie));
+        verify(movieRepository).findById(movieId);
     }
 
     @Test
     public void should_update_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        //Given
+        Long movieId = 1L;
+        Movie oldMovie = movie(movieId, 2005, "TestTitle");
+        Movie newMovie = movie(movieId, 2006, "Title2");
+        BDDMockito.given(movieRepository.findById(movieId)).willReturn(Optional.of(oldMovie));
+        BDDMockito.given(movieRepository.save(newMovie)).willReturn(newMovie);
 
-        Movie expectedMovie2 = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2006);
-        expectedMovie.setTitle("Title2");
+        //When
+        Movie result = this.movieService.updateMovie(movieId,newMovie);
 
-        when(movieRepository.findById(1L)).thenReturn(Optional.of(expectedMovie));
-
-        this.mockMvc.perform(put("/movies/1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1, \"year\": 2006, \"title\": \"Title2\"}"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-
-        verify(movieRepository).findById(1L);
-        verify(movieRepository).save(expectedMovie2);
+        //Then
+        assertThat(result).isEqualTo(newMovie);
+        verify(movieRepository).findById(movieId);
+        verify(movieRepository).save(newMovie);
     }
 
     @Test
-    public void should_put_new_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+    public void should_create_new_entity_for_not_existing_id() throws Exception {
+        //Given
+        Long movieId = 1L;
+        Movie newMovie = movie(movieId, 2006, "Title2");
+        BDDMockito.given(movieRepository.findById(movieId)).willReturn(Optional.empty());
+        BDDMockito.given(movieRepository.save(newMovie)).willReturn(newMovie);
 
-        when(movieRepository.findById(1L)).thenReturn(Optional.empty());
+        //When
+        Movie result = this.movieService.updateMovie(movieId,newMovie);
 
-        this.mockMvc.perform(put("/movies")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1, \"year\": 2005, \"title\": \"TestTitle\"}"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        verify(movieRepository).findById(1L);
-        verify(movieRepository).save(expectedMovie);
-
+        //Then
+        assertThat(result).isEqualTo(newMovie);
+        verify(movieRepository).findById(movieId);
+        verify(movieRepository).save(newMovie);
     }
 
     @Test
     public void should_delete_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        //Given
+        Long movieId = 1L;
 
-        when(movieRepository.findById(1L)).thenReturn(Optional.of(expectedMovie));
+        //When
+        this.movieService.deleteMovie(movieId);
 
-        this.mockMvc.perform(delete("/movies/1"))
-                .andDo(print())
-                .andExpect(status().isNoContent());
-
-        verify(movieRepository).deleteById(1L);
+        //Then
+        verify(movieRepository).deleteById(movieId);
     }
 
     @Test
     public void should_not_pass_year_validation() throws Exception {
-
-
         verify(movieRepository, never()).save(any());
     }
 

@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -26,9 +26,6 @@ public class MovieControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private MovieRepository movieRepository;
 
     @MockBean
     private MovieService movieService;
@@ -61,7 +58,7 @@ public class MovieControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(movieService).postMovie(expectedMovie);
+        verify(movieService).saveMovie(expectedMovie);
 
 
     }
@@ -104,7 +101,7 @@ public class MovieControllerTest {
                 .andExpect(status().isOk());
 
         verify(movieService).getMovie(1L);
-        verify(movieService).putMovie(1L, expectedMovie2);
+        verify(movieService).updateMovie(1L, expectedMovie2);
     }
 
     @Test
@@ -124,7 +121,7 @@ public class MovieControllerTest {
                 .andExpect(status().isOk());
 
         verify(movieService).getMovie(1L);
-        verify(movieService).putMovie(1L, expectedMovie);
+        verify(movieService).updateMovie(1L, expectedMovie);
 
     }
 

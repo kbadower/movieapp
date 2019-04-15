@@ -18,7 +18,7 @@ public class Movie {
     @Min(1900)
     private Integer year;
     @NotNull
-    @Size(min=1, max=30)
+    @Size(min = 1, max = 30)
     private String title;
 
     public Long getId() {

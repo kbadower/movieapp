@@ -9,7 +9,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 public class MovieServiceTest {
 
@@ -71,7 +72,7 @@ public class MovieServiceTest {
         BDDMockito.given(movieRepository.save(newMovie)).willReturn(newMovie);
 
         //When
-        Movie result = this.movieService.updateMovie(movieId,newMovie);
+        Movie result = this.movieService.updateMovie(movieId, newMovie);
 
         //Then
         assertThat(result).isEqualTo(newMovie);
@@ -88,7 +89,7 @@ public class MovieServiceTest {
         BDDMockito.given(movieRepository.save(newMovie)).willReturn(newMovie);
 
         //When
-        Movie result = this.movieService.updateMovie(movieId,newMovie);
+        Movie result = this.movieService.updateMovie(movieId, newMovie);
 
         //Then
         assertThat(result).isEqualTo(newMovie);

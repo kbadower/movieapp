@@ -35,6 +35,14 @@ public class MovieControllerTest {
     public void setUp() throws Exception {
     }
 
+    public Movie movie(Long id, int year, String title) {
+        Movie movie = new Movie();
+        movie.setId(id);
+        movie.setYear(year);
+        movie.setTitle(title);
+        return movie;
+    }
+
     @Test
     public void should_get_empty_movies() throws Exception {
         this.mockMvc.perform(get("/movies"))
@@ -46,10 +54,8 @@ public class MovieControllerTest {
 
     @Test
     public void should_add_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        Long movieId = 1L;
+        Movie expectedMovie = movie(movieId, 2005, "TestTitle");
 
 
         this.mockMvc.perform(post("/movies")
@@ -65,11 +71,8 @@ public class MovieControllerTest {
 
     @Test
     public void should_get_entity() throws Exception {
-
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        Long movieId = 1L;
+        Movie expectedMovie = movie(movieId, 2005, "TestTitle");
 
         when(movieService.getMovie(1L)).thenReturn(Optional.of(expectedMovie));
 
@@ -82,47 +85,18 @@ public class MovieControllerTest {
 
     @Test
     public void should_update_entity() throws Exception {
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
+        Long movieId = 1L;
+        Movie movie = movie(movieId, 2006, "NewTestTitle");
 
-        Movie expectedMovie2 = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2006);
-        expectedMovie.setTitle("Title2");
-
-        when(movieService.getMovie(1L)).thenReturn(Optional.of(expectedMovie));
+        when(movieService.updateMovie(movieId, movie)).thenReturn(movie);
 
         this.mockMvc.perform(put("/movies/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1, \"year\": 2006, \"title\": \"Title2\"}"))
+                .content("{\"id\": 1, \"year\": 2006, \"title\": \"NewTestTitle\"}"))
                 .andDo(print())
                 .andExpect(status().isOk());
 
-        verify(movieService).getMovie(1L);
-        verify(movieService).updateMovie(1L, expectedMovie2);
-    }
-
-    @Test
-    public void should_put_new_entity() throws Exception {
-
-        Movie expectedMovie = new Movie();
-        expectedMovie.setId(1L);
-        expectedMovie.setYear(2005);
-        expectedMovie.setTitle("TestTitle");
-
-        when(movieService.getMovie(1L)).thenReturn(Optional.empty());
-
-        this.mockMvc.perform(put("/movies/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"id\": 1, \"year\": 2005, \"title\": \"TestTitle\"}"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        verify(movieService).getMovie(1L);
-        verify(movieService).updateMovie(1L, expectedMovie);
-
+        verify(movieService).updateMovie(movieId, movie);
     }
 
     @Test

@@ -37,8 +37,7 @@ public class MovieService {
         return movieRepository.save(updatedMovie);
     }
 
-    Boolean deleteMovie(Long id) {
+    void deleteMovie(Long id) {
         movieRepository.deleteById(id);
-        return true;
     }
 }

@@ -109,9 +109,4 @@ public class MovieServiceTest {
         verify(movieRepository).deleteById(movieId);
     }
 
-    @Test
-    public void should_not_pass_year_validation() throws Exception {
-        verify(movieRepository, never()).save(any());
-    }
-
 }
